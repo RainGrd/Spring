@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/tx  http://www.springframework.org/schema/tx/spring-tx.xsd
+       http://www.springframework.org/schema/mvc  http://www.springframework.org/schema/mvc/spring-mvc.xsd
+       http://www.springframework.org/schema/context   http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/aop  http://www.springframework.org/schema/aop/spring-aop.xsd
+">
+    <!--开启组件扫描,排除controller和Component-->
+    <context:component-scan base-package="com.system">
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+    <!--加载jdbc配置文件-->
+    <context:property-placeholder location="classpath:jdbc.properties" ignore-unresolvable="true"/>
+    <!--加载数据源-->
+    <bean class="com.mchange.v2.c3p0.ComboPooledDataSource" id="dataSource">
+        <property name="driverClass" value="${jdbc.driver}"/>
+        <property name="jdbcUrl" value="${jdbc.url}"/>
+        <property name="user" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+        <!--初始化时获取三个连接，取值应在minPoolSize与maxPoolSize之间。默认为:3 -->
+        <!--指定连接池的初始化连接数 取值应在minPoolSize与maxPoolSize之前 默认为3-->
+        <property name="initialPoolSize" value="${jdbc.initialPoolSize}"/>
+        <!--连接池中保留的最大连接数，默认值为:15-->
+        <property name="maxPoolSize" value="${jdbc.maxPoolSize}"/>
+        <!--指定连接池中保留的最小连接数-->
+        <property name="minPoolSize" value="${jdbc.minPoolSize}"/>
+
+        <!--当连接池的连接耗尽的时候从c3p0一次同时获取的连接数 默认为3-->
+        <property name="acquireIncrement" value="${jdbc.acquireIncrement}"/>
+        <!--jdbc的标准，用于控制数据源内加载的PreparedStatements数量，但由于预缓存的statements
+        属于单个connection而不是整个连接池所以设置这个参数需要考虑到多方面的因数，
+        如果maxStatements与maxStatementsPerConnection均为0,则缓存被关闭，默认为:0
+        -->
+        <property name="maxIdleTime" value="${jdbc.maxIdleTime}"/>
+        <!--从数据库获取新连接失败后重复尝试的次数。小于等于0表示无限次  默认值: 30-->
+        <property name="acquireRetryAttempts" value="${jdbc.acquireRetryAttempts}"/>
+        <!--两次连接中间的间隔时间(重新尝试的时间间隔) 单位:毫秒 默认值：1000-->
+        <property name="acquireRetryDelay" value="${jdbc.acquireRetryDelay}"/>
+        <!--连接关闭时,是否将所有为提交的操作进行事务回滚,默认值为false-->
+        <property name="autoCommitOnClose" value="${jdbc.autoCommitOnClose}"/>
+        <!-- 当连接池用完时,客户端调用getConnection()后等待获取新连接的时间  单位：毫秒  默认值：0
+               如果值设为 0，将无限期等待，直到有空闲连接。  否则按照设置的值，超时将抛出SQLException异常
+               时间设置过小时会出现连接超时，这样会抛出SQLException异常，设置时间时需要小心，按照实际情况设置适当的值
+        -->
+        <property name="checkoutTimeout" value="${jdbc.checkoutTimeout}"/>
+        <!--检查数据库连接池中空闲连接的间隔时间，单位是分，默认值：240，如果要取消则设置为0-->
+        <property name="idleConnectionTestPeriod" value="${jdbc.idleConnectionTestPeriod}"/>
+        <!-- 配置PreparedStatement缓存，设置连接池为数据源缓存的PreparedStatement的总数
+                为0的时候不缓存，同时maxStatementsPerConnection的配置无效。
+               由于PreparedStatement属于单个Connection,所以这个数量应该根据应用中平均连接数乘以每个连接的平均PreparedStatement来计算
+               -->
+        <property name="maxStatements" value="${jdbc.maxStatements}"/>
+        <!--maxStatementsPerConnection定义了连接池单个连接所拥有的最大缓存statements数,默认为0-->
+        <property name="maxStatementsPerConnection" value="${jdbc.maxStatementsPerConnection}"/>
+        <!--数据库连接池过期时间应小于等于mysql的过期时间和mycat的过期时间-->
+    </bean>
+    <!--加载mybatis核心文件，创建工厂SQLSessionFactory-->
+    <bean class="org.mybatis.spring.SqlSessionFactoryBean" id="sqlSessionFactory">
+        <!--数据连接池-->
+        <property name="dataSource" ref="dataSource"/>
+        <!--mybatis核心配置文件-->
+        <property name="configLocation" value="classpath:mybatis-config.xml"/>
+        <!--集成mybatis插件-->
+<!--        <property name="plugins">
+            <array>
+                <bean class="com.github.pagehelper.PageInterceptor">
+                    <property name="properties">
+                        <value/>
+                    </property>
+                </bean>
+            </array>
+        </property>-->
+    </bean>
+    <!--加载Mapper映射文件-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer" id="mapperScannerConfigurer">
+        <property name="basePackage" value="com.system.mapper"/>
+    </bean>
+
+    <!--配置平台事务管理器-->
+    <bean class="org.springframework.jdbc.datasource.DataSourceTransactionManager" id="dataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <!--开启基于注解或者xml配置形式的事物-->
+    <aop:config>
+        <!--配置execution表达式-->
+        <aop:pointcut id="txPointcut" expression="execution(* com.system.service..*(..))"/>
+        <!--配置事务增强-->
+        <aop:advisor advice-ref="interceptor" pointcut-ref="txPointcut"/>
+    </aop:config>
+    <!--事务的增强-->
+    <tx:advice transaction-manager="dataSourceTransactionManager" id="interceptor">
+        <tx:attributes>
+            <!--配置所有方法都是事物方法-->
+            <tx:method name="*"/>
+            <!--所有get方法都是事物方法-->
+            <tx:method name="get*" read-only="true"/>
+        </tx:attributes>
+    </tx:advice>
+
+</beans>

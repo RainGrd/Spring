@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<script src="js/JQuery.min.js"></script>
+<body>
+<form action="/emailServlet" method="post" id="form">
+    <p>用户名：<input type="text" id="username" name="username" ></p>
+    <p>密码：<input type="password" id="password" name="password" ></p>
+    <p>邮箱：<input type="email" id="email" name="email" ></p>
+    <p><input type="submit" value="提交"></p>
+</form>
+</body>
+<!--使用ajax发送请求-->
+<script type="text/javascript">
+   $('#form').submit(function() {
+       let $formData={
+           username:'',
+           password:'',
+           email:'',
+       }
+       $formData.username=$("#username").val();
+       $formData.password=$("#password").val();
+       $formData.email=$("#email").val();
+       $.ajax({
+           method : "post",
+           url:"http://localhost:8080/java_email/emailServlet",
+           data:JSON.stringify($formData),
+           success : function(data) {
+               console.log(data);
+
+           }
+       })
+       return false;
+   })
+</script>
+</html>

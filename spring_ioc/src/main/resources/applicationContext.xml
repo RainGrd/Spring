@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd">
+    <!--配置文件-->
+<!--    <bean id="userDao" class="com.bdqn.dao.impl.UserDaoimpl" init-method="init" destroy-method="destory"></bean>-->
+<!--    <bean id="userDao" class="com.bdqn.factory.StaticFactory" factory-method="getUserDao"></bean>-->
+   <!-- <bean id="factory" class="com.bdqn.factory.DynamicFactory"></bean>
+    <bean id="userDao" factory-bean="factory" factory-method="getUserDao"></bean>-->
+
+    <!--<bean id="userDao" class="com.bdqn.dao.impl.UserDaoimpl">
+        <property name="username" value="段荣贵"></property>
+        <property name="age" value="15"></property>
+    </bean>-->
+    <bean id="userDao" class="com.bdqn.dao.impl.UserDaoimpl">
+        <property name="strList">
+            <list>
+                <value>zhangsan</value>
+                <value>李四</value>
+                <value>wangwu</value>
+            </list>
+        </property>
+
+        <property name="userMap">
+            <map>
+                <entry key="user1" value-ref="user1"></entry>
+                <entry key="user2" value-ref="user2"></entry>
+            </map>
+        </property>
+        <property name="properties">
+            <props>
+                <prop key="p1">
+                    ppp1
+                </prop>
+                <prop key="p2">
+                    ppp2
+                </prop>
+                <prop key="p3">
+                    ppp3
+                </prop>
+            </props>
+        </property>
+    </bean>
+    <bean id="user1" class="com.bdqn.pojo.User">
+        <property name="name" value="汤姆"></property>
+        <property name="addr" value="北京"></property>
+    </bean>
+    <bean id="user2" class="com.bdqn.pojo.User">
+        <property name="name" value="周珩"></property>
+        <property name="addr" value="衡阳"></property>
+    </bean>
+    <!--<bean id="userService" class="com.bdqn.service.impl.UserServiceImpl" p:userDao-ref="userDao">
+        &lt;!&ndash;引入userDao&ndash;&gt;
+&lt;!&ndash;        <property name="userDao" ref="userDao"></property>&ndash;&gt;
+    </bean>-->
+    <bean id="userService" class="com.bdqn.service.impl.UserServiceImpl">
+        <constructor-arg ref="userDao" name="userDao" ></constructor-arg>
+    </bean>
+
+
+
+    <import resource="applicationContext-user.xml"/>
+    <import resource="applicationContext-brand.xml"/>
+
+</beans>

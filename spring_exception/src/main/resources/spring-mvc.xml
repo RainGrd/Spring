@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+">
+
+    <!--1、mvc注解驱动-->
+    <mvc:annotation-driven/>
+
+    <!--2、配置视图解析器-->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+    <!--3、静态资源权限开放-->
+    <mvc:default-servlet-handler/>
+
+    <!--4、组件扫描  扫描Controller-->
+    <context:component-scan base-package="com.bdqn.controller"/>
+
+
+
+    <!--配置简单异常处理器-->
+    <!--<bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+        &lt;!&ndash;定义默认的异常处理页面&ndash;&gt;
+        <property name="defaultErrorView" value="error"/>
+        &lt;!&ndash;定义异常处理页面用来获取异常信息的变量名，也不可定义，默认名为exception &ndash;&gt;
+&lt;!&ndash;        <property name="exceptionAttribute" value="ex"/>&ndash;&gt;
+        &lt;!&ndash; 定义需要特殊处理的异常，这是重要点 &ndash;&gt;
+        <property name="exceptionMappings">
+&lt;!&ndash;            <props>
+                &lt;!&ndash;异常类型 错误视图&ndash;&gt;
+                <prop key="java.lang.RuntimeException" ></prop>
+            </props>&ndash;&gt;
+            &lt;!&ndash;继续定义其他的自定义异常&ndash;&gt;
+            <map>
+                &lt;!&ndash;key:错误类型 value：错误视图&ndash;&gt;
+                <entry key="java.lang.ClassCastException" value="error1"/>
+                <entry key="com.bdqn.exception.MyException" value="error"/>
+            </map>
+        </property>
+    </bean>-->
+
+    <!--配置@ControllerAdvice + @ExceptionHandler自定义异常的-->
+    <context:component-scan base-package="com.bdqn.exception"/>
+</beans>
